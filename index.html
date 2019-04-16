@@ -25,10 +25,13 @@
         addTaskButton.addEventListener("click", function() { 
             var select = BuildSelectElement();                      //Build out a "Options element" so that we can grab the project that we want to submit for
             var input = document.createElement("input");            //Create the input element. Allows us to input a time. We are going to need to clean this input.
-            //var removeBtn = document.createElement("button").addEventListener("click", RemoveListItem);
+            var removeBtn = document.createElement("button");
+            removeBtn.innerText = "-";
+            removeBtn.addEventListener("click", RemoveListItem);
             var inputContainer = document.createElement("li");      //We need all of this to live inside a list element. This is that
             inputContainer.appendChild(select);                     //Add the options element to the list
             inputContainer.appendChild(input);                      //Add the input to the list
+            inputContainer.appendChild(removeBtn);                  //Add the remove button to the list
             taskList.appendChild(inputContainer);                   //And then all all of this to the task list
         })
     }
@@ -49,8 +52,9 @@
         return select;
     }
 
-    // function removeListItem(e) {
-    //     console.log(event.target)
-    // }
+    function RemoveListItem(e) {
+        console.dir(event.target.parentNode);
+        taskList.removeChild(event.target.parentNode);
+    }
 </script>
 </html>
