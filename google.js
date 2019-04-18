@@ -2,113 +2,91 @@ var GoogleSpreadsheet = require('google-spreadsheet');
 var async = require('async');
 
 // spreadsheet key is the long id in the sheets URL
-var doc = new GoogleSpreadsheet('insert link to ss here');
+var doc = new GoogleSpreadsheet('<INSERT SPREADSHEET HERE>');
 const refSheetName = "Range Sheet";   //Easy to set ref sheet, we can probably even set this in an options screen to be honest.
 
 var refSheet;                       //We need access to the sheet that has all of the project, platform and team data on it
-var sheet;
-var projects;                       //An array of all the projects that the team is currently working on
-var teams;                          //An array of the teams that are available
-var plats;                          //An array of platforms that we have that we are working on currently
+var projects = new Array(1);        //An array of all the projects that the team is currently working on
+var teams = new Array(1);           //An array of the teams that are available
+var plats = new Array(1);
+
+var initialized = false;						//We need to wait for this to be true before we actually start up the app. For now its going to remain here as a reminder of future!
  
 async.series([
-  function setAuth(step) {
-    // see notes below for authentication instructions!
-    var creds = require('<insert creds here>');
+	function setAuth(step) {
+		// see notes below for authentication instructions!
+		var creds = require('./JSON/<INSERT CREDS HERE>');
  
-    doc.useServiceAccountAuth(creds, step);
-  },
-  function getInfoAndWorksheets(step) {
-    doc.getInfo(function(err, info) {
-      console.log('Loaded doc: '+info.title+' by '+info.author.email);
-      sheet = info.worksheets[0];
-      console.log('sheet 1: '+sheet.title+' '+sheet.rowCount+'x'+sheet.colCount);
-      step();
-    });
-   },
-   function getRefData(step) {
-       doc.getInfo(function(err, info) {
-            for(var i = 0; i < info.worksheets.length; i++) {
-                if(info.worksheets[i].title == refSheetName) {
-                    refSheet = info.worksheets[i];
-                    break;
-                }
-            }
-            
-            if(refSheet!==null) {
-                console.log(refSheet);
-            }
+		doc.useServiceAccountAuth(creds, step);
+	},
+	function getRefData(step) {
+		doc.getInfo(function(err, info) {
+			for(var i = 0; i < info.worksheets.length; i++) {
+				if(info.worksheets[i].title == refSheetName) { 
+					refSheet = info.worksheets[i];
+				}
+			}
+			if(refSheet!==null) {
+				refSheet.getCells({
+					'min-row': 2,
+					'max-row': 15,
+					'min-col': 1,
+					'max-col': 1,
+					'return-empty':false
+				}, function (err, cells) {
+					cells.forEach(function(cell) {
+						console.log(cell.value);
+						projects.push(cell.value);
+					});
+					projects.shift();
+				})
 
-       });
-   }
-//   function workingWithRows(step) {
-//     // google provides some query options
-//     sheet.getRows({
-//       offset: 1,
-//       limit: 20,
-//       orderby: 'col2'
-//     }, function( err, rows ){
-//       console.log('Read '+rows.length+' rows');
- 
-//       // the row is an object with keys set by the column headers
-//       rows[0].colname = 'new val';
-//       rows[0].save(); // this is async
- 
-//       // deleting a row
-//       rows[0].del();  // this is async
- 
-//       step();
-//     });
-//   },
-//   function workingWithCells(step) {
-//     sheet.getCells({
-//       'min-row': 1,
-//       'max-row': 5,
-//       'return-empty': true
-//     }, function(err, cells) {
-//       var cell = cells[0];
-//       console.log('Cell R'+cell.row+'C'+cell.col+' = '+cell.value);
- 
-//       // cells have a value, numericValue, and formula
-//       cell.value == '1'
-//       cell.numericValue == 1;
-//       cell.formula == '=ROW()';
- 
-//       // updating `value` is "smart" and generally handles things for you
-//       cell.value = 123;
-//       cell.value = '=A1+B2'
-//       cell.save(); //async
- 
-//       // bulk updates make it easy to update many cells at once
-//       cells[0].value = 1;
-//       cells[1].value = 2;
-//       cells[2].formula = '=A1+B1';
-//       sheet.bulkUpdateCells(cells); //async
- 
-//       step();
-//     });
-//   },
-//   function managingSheets(step) {
-//     doc.addWorksheet({
-//       title: 'my new sheet'
-//     }, function(err, sheet) {
- 
-//       // change a sheet's title
-//       sheet.setTitle('new title'); //async
- 
-//       //resize a sheet
-//       sheet.resize({rowCount: 50, colCount: 20}); //async
- 
-//       sheet.setHeaderRow(['name', 'age', 'phone']); //async
- 
-//       // removing a worksheet
-//       sheet.del(); //async
- 
-//       step();
-//     });
-//   }
-], function(err){
-    if( err ) {
-      console.log('Error: '+err);
-    }
+				refSheet.getCells({
+					'min-row': 2,
+					'max-row': 15,
+					'min-col': 2,
+					'max-col': 2,
+					'return-empty':false
+				}, function (err, cells) {
+					cells.forEach(function(cell) {
+						console.log(cell.value);
+						plats.push(cell.value);
+					});
+					plats.shift();
+				})
+
+				refSheet.getCells({
+					'min-row': 2,
+					'max-row': 15,
+					'min-col': 3,
+					'max-col': 3,
+					'return-empty':false
+				}, function (err, cells) {
+					cells.forEach(function(cell) {
+						teams.push(cell.value);
+					});
+					teams.shift();
+				})
+			}
+		})
+	 }
+	], function(err){
+			if( err ) {
+				console.log('Error: '+err);
+			}
 });
+
+function GetProjectsList(){
+	console.log(projects);
+	return projects;
+}
+
+function GetPlatformsList(){
+	console.log(plats);
+	return plats;
+}
+
+function GetTeamsList(){
+	console.log(teams);
+	return teams;
+}

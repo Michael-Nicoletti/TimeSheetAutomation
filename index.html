@@ -20,34 +20,35 @@
     <script>
         var addTaskButton = document.getElementById("addNewTask");
         var taskList = document.querySelector("ul");
-        var projectsList = BuildProjectList();
+        var projectsList = GetProjectsList();
+        var teamsList = GetTeamsList();
+        var platsList = GetPlatformsList();
 
         if(addTaskButton !== null) {
             addTaskButton.addEventListener("click", function() { 
-                var select = BuildSelectElement();                      //Build out a "Options element" so that we can grab the project that we want to submit for
+                var select = [BuildSelectElement(projectsList), BuildSelectElement(platsList), BuildSelectElement(teamsList) ] //Build out a "Options element" so that we can grab the project that we want to submit for
+                console.log(select);
                 var input = document.createElement("input");            //Create the input element. Allows us to input a time. We are going to need to clean this input.
                 var removeBtn = document.createElement("button");
                 removeBtn.innerText = "-";
                 removeBtn.addEventListener("click", RemoveListItem);
                 var inputContainer = document.createElement("li");      //We need all of this to live inside a list element. This is that
-                inputContainer.appendChild(select);                     //Add the options element to the list
+                select.forEach(function(selection) {
+                    inputContainer.appendChild(selection);
+                });
+                //inputContainer.appendChild(select);                     //Add the options element to the list
                 inputContainer.appendChild(input);                      //Add the input to the list
                 inputContainer.appendChild(removeBtn);                  //Add the remove button to the list
                 taskList.appendChild(inputContainer);                   //And then all all of this to the task list
             })
         }
 
-        function BuildProjectList() {
-            var returnList = ["Proj1", "Proj2", "Proj3" ];              //Purely temp. This needs to grab from the Google Sheet API
-            return returnList;
-        }
-
-        function BuildSelectElement() {
+        function BuildSelectElement(listType) {
             var select = document.createElement("select");              //Start by making the actual list
             var optionElement = null;
-            for(var i = 0; i < projectsList.length; i++) {              //Loop through all of our projects and add them to the list
+            for(var i = 0; i < listType.length; i++) {              //Loop through all of our projects and add them to the list
                 optionElement = document.createElement("option");
-                optionElement.innerText = projectsList[i];
+                optionElement.innerText = listType[i];
                 select.appendChild(optionElement);
             }
             return select;
